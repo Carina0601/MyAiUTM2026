@@ -1,6 +1,1 @@
-hi hi hi hi hi
-text
-my name is Janie
-beautiful beautiful library
-I have one needle two pens 3 o r and 5 cars
-all the words I considered advanced that I came across during conversations while watching TV series and films while watching YouTube videos
+property for setting model with style and colour
