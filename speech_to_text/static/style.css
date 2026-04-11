@@ -1,0 +1,32 @@
+/**************************************************
+* Author: Cynthia
+* Date: 11 April 2026
+* Description: Styles for UTM Project-2030
+**************************************************/
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f9;
+}
+.container {
+    text-align: center;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+}
+button:hover { background-color: #0056b3; }
+#status { margin: 15px; color: #666; }
+.result-box { margin-top: 20px; border-top: 1px solid #eee; }
