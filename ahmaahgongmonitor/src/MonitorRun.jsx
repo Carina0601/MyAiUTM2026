@@ -4,8 +4,6 @@ import { db } from './firebase';
 import { ref, onValue } from 'firebase/database';
 import PatientMonitor from './PatientMonitor';
 import './PatientMonitor.css'; 
-import logo from './assets/logo.png';
-import user from './assets/user.png';
 import { seedDatabase } from './seed';
 
 const MonitorRun = () => {
@@ -50,12 +48,6 @@ const MonitorRun = () => {
 
   return (
     <div className='background'>
-        <div className='top-navigation-container'>
-          <img style={{height: 'auto', width: '115px'}} src={logo} alt="Logo"></img>
-          {/* <p style={{fontSize: '30px' ,fontWeight: '550', color: 'rgb(63,103,191)', }}>Ahma Ahgong Monitor</p> */}
-
-          <img className='profile-pic' src={user} alt="User"></img>
-        </div>
 
         <div className="dashboard-container">
           <div className ="page-title">

@@ -393,3 +393,29 @@ h1, p{
   justify-content: center;
   align-items: center;
 }
+
+.options-container{
+  display: flex;
+  justify-content: space-around;
+  width: 60%;
+}
+
+.options{
+  text-decoration: none;
+  color: inherit;
+  display: inline-block; 
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.options:hover{
+  transform: scale(1.05);
+  font-weight: 550;
+  color: #007bff;
+}
+
+.options.active {
+  background-color: #2e7d32;
+  color: white;
+}
