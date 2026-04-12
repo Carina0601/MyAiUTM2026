@@ -1,1 +1,0 @@
-property for setting model with style and colour
