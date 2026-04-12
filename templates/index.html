@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ambulance AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fb;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 900px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .desc {
+            color: gray;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Ambulance Emergency AI</h1>
+    <div class="desc">
+        Enter speech transcription from ambulance crew. AI will generate structured report PDF.
+    </div>
+
+    <form method="POST" action="/generate-pdf">
+        <textarea name="text" placeholder="Example: 45 year old male, chest pain, BP 90/60..."></textarea>
+        <br>
+        <button type="submit">Generate PDF Report</button>
+    </form>
+
+</div>
+
+</body>
+</html>
