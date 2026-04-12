@@ -15,6 +15,20 @@ const MonitorRun = () => {
   const critical = Object.entries(patients).filter(([, p]) => p.heartRate > 120 || p.heartRate < 60);
   const stable = Object.entries(patients).filter(([, p]) => p.heartRate <= 120 && p.heartRate >= 60);
 
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  const timeString = currentTime.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
+  const dateString = currentTime.toLocaleDateString([], {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+
   useEffect(() => {
     const patientsRef = ref(db, 'patients');
     const unsubscribe = onValue(patientsRef, (snapshot) => {
@@ -24,27 +38,55 @@ const MonitorRun = () => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(()  => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   if (loading) return <div className="dashboard-container">Connecting...</div>;
 
   return (
     <div className='background'>
         <div className='top-navigation-container'>
-          <img style={{height: 'auto', width: '115px'}} src={logo} alt="Logo" />
+          <img style={{height: 'auto', width: '115px'}} src={logo} alt="Logo"></img>
           {/* <p style={{fontSize: '30px' ,fontWeight: '550', color: 'rgb(63,103,191)', }}>Ahma Ahgong Monitor</p> */}
+
           <img className='profile-pic' src={user} alt="User"></img>
         </div>
+
         <div className="dashboard-container">
           <div className ="page-title">
-            <div className='spaced-between'>
+            <div className="spaced-between">
               <h1 style={{fontSize: '22px', fontWeight: '550'}}>Elderly Vital Signs Monitoring</h1>
               <div style={{display: 'flex', alignItems: 'center', gap: '10px', color: 'grey'}}>
                 <div className="pulse-dot"></div>
                   <span>Live Connection -</span>
-                  <p>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                  <p>({new Date().toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'})})</p>
+                  <p>{timeString}</p>
+                  <p>{dateString}</p>
               </div>
             </div>
-            <p style={{fontSize: '16px', color: 'grey'}}>{Object.keys(patients).length} elderlies connected via Smart Ring</p>
+              <p style={{fontSize: '16px', color: 'grey'}}>{Object.keys(patients).length} elderlies connected via Smart Ring</p>
+          </div>
+
+          <div className="empty-container">
+            <p style={{fontSize: '20px', fontWeight: '550', color: '#2e7d32'}}>OVERVIEW</p>
+                <div style={{width: '100%', gap: '20px', justifyContent: 'space-around'}} className='flex-row'>
+                  <div style={{justifyContent: 'center', alignItems: 'center'}} className='flex-column'>
+                    <p style={{fontSize: '11px', color: 'grey', letterSpacing: '0.05em'}}>TOTAL PATIENTS</p>
+                    <p style={{fontSize: '20px', fontWeight: '600'}}>{Object.keys(patients).length}</p>
+                  </div>
+                  <div style={{justifyContent: 'center', alignItems: 'center', paddingRight: '50px'}} className='flex-column'>
+                    <p style={{fontSize: '11px', color: 'grey', letterSpacing: '0.05em'}}>CRITICAL</p>
+                    <p style={{fontSize: '20px', fontWeight: '600', color: critical.length > 0 ? '#d32f2f' : 'inherit'}}>{critical.length}</p>
+                  </div>
+                  <div style={{justifyContent: 'center', alignItems: 'center'}} className='flex-column'>
+                    <p style={{fontSize: '11px', color: 'grey', letterSpacing: '0.05em'}}>STABLE</p>
+                    <p style={{fontSize: '20px', fontWeight: '600', color: '#2e7d32'}}>{stable.length}</p>
+                  </div>
+                </div>
           </div>
 
         {critical.length > 0 && (
@@ -69,7 +111,7 @@ const MonitorRun = () => {
           ))}
         </div>
 
-        <button onClick={seedDatabase}>Seed DB</button>
+        <button style={{ marginTop: '20px', border: 'none', backgroundColor: 'black', color: 'white', fontWeight: '550', padding: '4px 15px', borderRadius: '10px'}} onClick={seedDatabase}>Test Data</button>
       </div>
     </div>
 
