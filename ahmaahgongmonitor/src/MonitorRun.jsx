@@ -51,14 +51,9 @@ const MonitorRun = () => {
 
         <div className="dashboard-container">
           <div className ="page-title">
-            <div className="spaced-between">
+            <div style={{alignItems: 'center'}} className="spaced-between">
               <h1 style={{fontSize: '22px', fontWeight: '550'}}>Elderly Vital Signs Monitoring</h1>
-              <div style={{display: 'flex', alignItems: 'center', gap: '10px', color: 'grey'}}>
-                <div className="pulse-dot"></div>
-                  <span>Live Connection -</span>
-                  <p>{timeString}</p>
-                  <p>{dateString}</p>
-              </div>
+              <button style={{backgroundColor: '#007bff'}} className="button"><span style={{fontSize: '20px'}}>+ </span> Add New Patient</button>
             </div>
               <p style={{fontSize: '16px', color: 'grey'}}>{Object.keys(patients).length} elderlies connected via Smart Ring</p>
           </div>

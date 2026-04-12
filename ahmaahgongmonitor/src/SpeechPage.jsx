@@ -3,7 +3,7 @@ import './PatientMonitor.css';
 
 export default function SpeechPage() {
   return (
-    <div className='background'>
+    <div style={{marginTop: '5px'}} className='background'>
       <div className="dashboard-container">
         {/* Header Section */}
         <div className="page-title">

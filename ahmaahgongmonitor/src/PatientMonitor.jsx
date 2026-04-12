@@ -4,6 +4,7 @@ import './PatientMonitor.css';
 import user from './assets/user.png';
 import { db } from './firebase';
 import { ref, update } from 'firebase/database';
+import ambulance from './assets/ambulance.png';
 
 const stablePath = `M0,36 C15,36 25,36 38,36 C44,36 46,32 49,32 C51,32 52,36 53,36 C55,36 57,34 60,22 C62,14 63,8 65,5 C66,3 67,4 68,9 C70,18 72,42 74,46 C75,48 77,44 79,40 C82,37 86,36 95,36 C108,36 118,39 132,39 C146,39 156,37 168,36 C220,36 270,36 320,36`;
 
@@ -14,6 +15,7 @@ const PatientMonitor = ({ id, p }) => {
   const path = isCritical ? critPath : stablePath;
   const ecgColor = isCritical ? '#ff4d4d' : '#4CAF50';
   const speed = (60 / Math.max(p.heartRate, 30) * 2.8).toFixed(1);
+  const [isClosing, setIsClosing] = useState(false);
   // const respiratoryRate = Math.floor(p.heartRate / 4) + (Math.random() > 0.5 ? 1 : -1);
   // const spo2 = p.heartRate > 120 ? Math.floor(Math.random() * (96 - 92 + 1) + 92) : Math.floor(Math.random() * (100 - 97 + 1) + 97);
 
@@ -188,9 +190,30 @@ useEffect(() => {
                 dispatchedAt: new Date().toISOString(),
               });
               setNotes('');
-              setModal(null)
-              }}>Send</button>
+              setModal('success')
+
+              setTimeout(() =>{
+                setIsClosing(true);
+                
+                  setTimeout(() => {
+                    setModal(null);
+                    setIsClosing(false);
+                  }, 500);
+
+              }, 2500);
+              }}
+              >
+              Send</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {status === 'success' && (
+        <div className = "overlay-background">
+          <div className = {`ambulance-dispatched-popup ${isClosing ? 'hide' : ''}`}>
+            <h3 style={{fontSize: '16px'}}>Ambulance Dispatched!</h3>
+            <img style={{height: 'auto', width: '115px'}} src={ambulance} alt="Ambulance"></img>
           </div>
         </div>
       )}

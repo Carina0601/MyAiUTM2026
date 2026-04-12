@@ -3,7 +3,7 @@ import './PatientMonitor.css'; // Use the same CSS for the background
 
 export default function SummaryPage() {
   return (
-    <div className='background'>
+    <div style={{marginTop: '5px'}}  className='background'>
       <div className="dashboard-container">
         <div className="page-title">
           <h1 style={{fontSize: '22px', fontWeight: '550'}}>AI Medical Summary</h1>

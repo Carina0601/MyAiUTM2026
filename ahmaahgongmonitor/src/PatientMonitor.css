@@ -5,7 +5,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #f4f7f6; 
+  background-color: #f4f7f7; 
   min-height: 100%;
 }
 
@@ -59,7 +59,7 @@ h1, p{
   padding-bottom: 40px;
   padding-left: 20px;
   padding-right: 20px;
-  background-color: #f4f7f6;
+  background-color: #f4f7f7;
   min-height: 100vh;
   font-family: Arial, sans-serif;
   box-sizing: border-box;
@@ -152,6 +152,25 @@ h1, p{
   height: 50px; 
   width: 0;
   margin: 0 15px; 
+}
+
+.button{
+  font-weight: 550;
+  font-size: 16px;
+  color: white;
+  border: none;
+  width: fit-content;
+  height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 5px 10px;
+  transition: all 0.3s ease;
+}
+
+.button:hover{
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .view-info-button{
@@ -258,6 +277,29 @@ h1, p{
   animation: popIn 0.2s ease-out;
 }
 
+.ambulance-dispatched-popup{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  height: 40%;
+  max-height: 250px;
+  width: 90%;
+  max-width: 420px;
+  animation: popIn 0.2s ease-out;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ambulance-dispatched-popup.hide {
+  opacity: 0;
+  transform: scale(0.9) translateY(10px);
+  transition: opacity 0.5s ease-in, transform 0.5s ease-in;
+}
+
 .content-container{
   display: flex;
   flex-direction: column;
@@ -279,7 +321,13 @@ h1, p{
   max-height: 280px;
   width: 90%;
   max-width: 420px;
-  animation: popIn 0.2s ease-out;
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.hide {
+  opacity: 0;
+  transform: scale(0.9) translateY(-20px);
+  pointer-events: none;
 }
 
 .add-notes-popup{
@@ -416,6 +464,7 @@ h1, p{
 }
 
 .options.active {
-  background-color: #2e7d32;
-  color: white;
+  background-color: #fff;
+  color: #0062cb;
 }
+
