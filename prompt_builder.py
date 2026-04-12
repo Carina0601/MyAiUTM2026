@@ -25,6 +25,7 @@ def build_summary_prompt(text):
     Include trends or changes in condition if mentioned.
     Avoid repeating information or making assumptions.
     If no information, label as 'unknown'.
+    suggested doctor can be multiple if needed.
 
     Speech Input:
     {text}

@@ -26,7 +26,14 @@ def generate_pdf():
     if request.method == "GET":
         return "Use the form to submit text"
 
-    text = request.form.get("text")
+    file_path = "output.txt"
+
+    with open(file_path, "r") as file:
+        text = file.read()
+
+    with open(file_path, "w") as file:
+        file.write("")
+
 
     prompt = build_summary_prompt(text)
     result = generate_summary(prompt)
