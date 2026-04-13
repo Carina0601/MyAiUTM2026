@@ -1,5 +1,5 @@
 import React from 'react';
-import './PatientMonitor.css'; // Use the same CSS for the background
+import './PatientMonitor.css'; 
 
 export default function SummaryPage() {
   return (

@@ -218,11 +218,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* <p style={{ fontWeight: 'bold', color: '#777' }}>
-        Status: {isCritical ? '⚠️ CRITICAL' : '✅ STABLE'}
-      </p> */}
-
-      {/* {isCritical && <button className="alert-button">ALERT MEDICAL TEAM</button>} */}
     </div>
   );
 };

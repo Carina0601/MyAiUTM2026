@@ -5,7 +5,6 @@ export default function SpeechPage() {
   return (
     <div style={{marginTop: '5px'}} className='background'>
       <div className="dashboard-container">
-        {/* Header Section */}
         <div className="page-title">
           <h1 style={{fontSize: '22px', fontWeight: '550', color: '#333'}}>
             Speech to Text Function
@@ -15,7 +14,6 @@ export default function SpeechPage() {
           </p>
         </div>
         
-        {/* Main Content Card */}
         <div className="empty-container" style={{
           marginTop: '20px', 
           textAlign: 'center', 
@@ -32,7 +30,6 @@ export default function SpeechPage() {
              Click the microphone icon to start transcribing...
            </p>
            
-           {/* Placeholder for your future Mic button */}
            <button style={{
              marginTop: '20px',
              padding: '10px 25px',
