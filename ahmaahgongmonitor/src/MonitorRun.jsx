@@ -6,6 +6,7 @@ import PatientMonitor from './PatientMonitor';
 import './PatientMonitor.css'; 
 import { seedDatabase } from './seed';
 import check from './assets/check.png';
+import ring from './assets/smart-ring.png';
 
 const MonitorRun = () => {
   const [patients, setPatients] = useState({});
@@ -16,12 +17,15 @@ const MonitorRun = () => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [selectedId, setSelectedId] = useState(null);
+
   const [status, setModal] = useState(null);
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [address, setAddress] = useState('');
   const [condition, setCondition] = useState('');
   const [emergency, setEmergency] = useState('');
+  const [ringId, setRingId] = useState('');
 
   const timeString = currentTime.toLocaleTimeString([], {
     hour: '2-digit',
@@ -104,7 +108,11 @@ const MonitorRun = () => {
         </div>
         <div className="grid-layout">
           {stable.map(([id, p]) => (
-            <PatientMonitor key={id} id={id} p={p} /> 
+            <PatientMonitor key={id} id={id} p={p}
+              onOpenProfile={(id, modalName) => {
+                setSelectedId(id);
+                setModal('update-device')
+              }} /> 
           ))}
         </div>
 
@@ -152,16 +160,8 @@ const MonitorRun = () => {
                   setAddress('');
                   setCondition('');
                   setEmergency('');
-                  setModal('add-success');
-
-                  setTimeout(() => {
-                    setIsClosing(true);
-
-                    setTimeout(() => {
-                      setModal(null);
-                      setIsClosing(false);
-                    }, 500);
-                  }, 2000);
+                  setSelectedId(nextId);
+                  setModal('add-device');
                 })
                 .catch((error) => {
                   console.error("Error adding patient: ", error);
@@ -175,16 +175,87 @@ const MonitorRun = () => {
         </div>
       )}
 
+      {status === 'add-device' && (
+        <div className="overlay-background">
+          <div className= "add-ring-popup">
+            <img style={{height: 'auto', width: '70px', marginBottom: '30px'}} src={ring} alt="ring"></img>
+            <h3 style={{fontSize: '18px'}}>Please enter your Smart Ring ID</h3>
+            <input className="cleaner-text-input" type="text" value={ringId} onChange={e => setRingId(e.target.value)} placeholder='e.g (SR0001)'></input>
+            <button style={{backgroundColor: '#007bff', fontSize: '14px', width: '100%'}} className='button'
+              onClick = {() => {
+                update(ref(db,`patients/${selectedId}`), {
+                  ringId: ringId,
+                })
+                .then(() => {
+                  setRingId('');
+                  setModal('add-success');
+
+                  setTimeout(() => {
+                    setIsClosing(true);
+
+                    setTimeout(() => {
+                      setModal(null);
+                      setIsClosing(false);
+                    }, 500);
+                  }, 2000);
+                })
+              }}>
+
+            Link Now</button>
+          </div>
+        </div>
+      )}
+
+      {status === 'update-device' && (
+        <div className="overlay-background">
+          <div className= "update-ring-popup">
+            <img style={{height: 'auto', width: '70px', marginBottom: '30px'}} src={ring} alt="ring"></img>
+            <h3 style={{fontSize: '18px'}}>Please enter your new Smart Ring ID</h3>
+            <input className="cleaner-text-input" type="text" value={ringId} onChange={e => setRingId(e.target.value)} placeholder='e.g (SR0001)'></input>
+            <button style={{backgroundColor: '#007bff', fontSize: '14px', width: '100%'}} className='button'
+              onClick = {() => {
+                update(ref(db,`patients/${selectedId}`), {
+                  ringId: ringId,
+                })
+                .then(() => {
+                  setRingId('');
+                  setModal('update-success');
+
+                  setTimeout(() => {
+                    setIsClosing(true);
+
+                    setTimeout(() => {
+                      setModal(null);
+                      setIsClosing(false);
+                    }, 500);
+                  }, 2000);
+                })
+              }}>
+
+            Link Now</button>
+          </div>
+        </div>
+      )}
+
       {status === 'add-success' && (
         <div className={`overlay-background ${isClosing ? 'hide' : ''}`}>
-            <div className="add-success-popup">
+          <div className="add-success-popup">
               <img style={{height: 'auto', width: '115px'}} src={check} alt="Check"></img>
                 <h3 style={{ fontSize: '18px' }}>Patient Registered</h3>
                 <p style={{ color: 'grey', fontSize: '14px' }}>Successfully added to the monitor system.</p>
-              </div>
-            </div>
+          </div>
+        </div>
       )}
 
+      {status === 'update-success' && (
+        <div className={`overlay-background ${isClosing ? 'hide' : ''}`}>
+          <div className="update-success-popup">
+              <img style={{height: 'auto', width: '115px'}} src={check} alt="Check"></img>
+                <h3 style={{ fontSize: '18px' }}>Smart Ring Updated Successfully!</h3>
+                <p style={{ color: 'grey', fontSize: '14px' }}>Successfully updated the monitor system.</p>
+          </div>
+        </div>
+      )}
     </div>
 
   );

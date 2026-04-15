@@ -10,7 +10,7 @@ const stablePath = `M0,36 C15,36 25,36 38,36 C44,36 46,32 49,32 C51,32 52,36 53,
 
 const critPath = `M0,36 C10,36 20,36 30,36 C35,36 37,30 39,30 C41,30 42,36 43,36 C45,36 47,28 49,10 C50,3 51,1 52,1 C53,0 54,3 55,10 C56,20 58,48 60,52 C61,54 63,48 65,40 C67,36 70,36 80,36 C95,36 108,40 124,40 C138,40 150,38 162,36 C220,36 270,36 320,36`;
 
-const PatientMonitor = ({ id, p }) => {
+const PatientMonitor = ({ id, p, onOpenProfile }) => {
   const isCritical = p.heartRate > 120 || p.heartRate < 60;
   const path = isCritical ? critPath : stablePath;
   const ecgColor = isCritical ? '#ff4d4d' : '#4CAF50';
@@ -35,7 +35,7 @@ useEffect(() => {
     spo2: calculatedSpo2,
     resp: calculatedResp,
   });
-}, [p.heartRate]);
+}, [id, p.heartRate]);
 
   const [status, setModal] = useState(null);
   const [notes, setNotes] = useState('');
@@ -92,8 +92,10 @@ useEffect(() => {
 
       <hr className= "separator-h"></hr>
 
-      <button onClick={()=> setModal(isCritical ? 'dispatch' : 'details')} className='view-info-button' style={{ color: isCritical ? 'white' : 'obsidian', border: isCritical ? 'none' : '1px solid rgb(220, 220, 220)', backgroundColor: isCritical ? '#d32f2f' : '#fff', color: isCritical ? 'white' : 'black'}} >
-        {isCritical ? 'Dispatch Ambulance' : 'View Details'}
+      <button onClick={()=> {setModal(isCritical ? 'dispatch' : 'details')}} 
+                            className='view-info-button' 
+                            style={{ color: isCritical ? 'white' : 'obsidian', border: isCritical ? 'none' : '1px solid rgb(220, 220, 220)', backgroundColor: isCritical ? '#d32f2f' : '#fff', color: isCritical ? 'white' : 'black'}} >
+                            {isCritical ? 'Dispatch Ambulance' : 'View Details'}
       </button>
 
       {status === 'details' && (
@@ -141,7 +143,10 @@ useEffect(() => {
               <p style={{fontSize: '14px'}}>{p.conditions}</p>
             </div>
 
-            <button className= 'close-button' onClick={()=> setModal(null)}>Close</button>
+            <div style={{gap: '10px'}} className='flex-row'>
+              <button style={{flex: '1'}} className= 'close-button' onClick={()=> setModal(null)}>Close</button>
+              <button style={{flex: '1', backgroundColor: "#007bff"}} className= 'button' onClick={()=> {setModal(null); onOpenProfile(id);}}>Update Ring</button>
+            </div>
           </div>
         </div>
       )}
