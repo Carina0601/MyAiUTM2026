@@ -1,0 +1,80 @@
+.background {
+  margin-top: 5px;
+  background: #f4f6f8;
+  min-height: 100vh;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  margin-top: 80px;
+}
+
+.page-title h1 {
+  font-size: 22px;
+  font-weight: 550;
+  margin-bottom: 5px;
+}
+
+.page-title p {
+  font-size: 16px;
+  color: grey;
+  margin: 0;
+}
+
+.content-area {
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.empty-text {
+  text-align: center;
+  color: grey;
+}
+
+.file-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.file-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.report {
+  padding: 15px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.report:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.file-name {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.file-date {
+  font-size: 13px;
+  color: grey;
+}
+
+.report.read {
+  background: #cfcfcf;
+  opacity: 0.65;
+}
+
+.report.read .file-name {
+  color: #393939;
+}

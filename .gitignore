@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+node_modules/
+firebase-key.json
+generated/
+google_credentials.json
+.env.local
+
