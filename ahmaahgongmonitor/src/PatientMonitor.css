@@ -554,3 +554,27 @@ h1, p{
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transition: transform 0.3s ease-in, opacity 0.3s ease-in;
 }
+
+.mode-toggle-button {
+  background-color: #f0f2f5;
+  border: 1px solid #ddd;
+  padding: 3px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-toggle-button:hover {
+  opacity: 0.9;;
+  transform: scale(1.05);
+}
+
+/* Optional: Different hover color based on mode */
+.mode-toggle-button:active {
+  transform: scale(0.95);
+}
