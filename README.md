@@ -74,7 +74,7 @@ cd frontend
 npm install
 ```
 
-**Frontend Environment Variables: **
+**Frontend Environment Variables:** 
 Create a .env.local file inside the frontend folder and add your Firebase client configuration:
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
