@@ -12,7 +12,7 @@ function App() {
   // Save state
   const [saveStatus, setSaveStatus] = useState("idle");
 
-  // OCR state (Upload functionality removed)
+  // OCR state
   const [image, setImage] = useState(null);
   const [scanStatus, setScanStatus] = useState("idle");
 
@@ -47,6 +47,20 @@ function App() {
     }
     return () => clearInterval(timerRef.current);
   }, [recording]);
+
+  // ── RESET HELPER ────────────────────────────────────────────
+  // 调用此函数可清空当前所有输入，以便录入下一个病人
+  const resetForm = () => {
+    setPatientName("");
+    setPatientIc("");
+    setSpeechText("");
+    setImage(null);
+    setScanStatus("idle");
+    setCaptured(false);
+    setRecordSeconds(0);
+    // 如果录音还在进行则停止它
+    setRecording(false);
+  };
 
   // ── WEBCAM helpers ─────────────────────────────────────────
   const stopStream = useCallback(() => {
@@ -144,7 +158,11 @@ function App() {
       });
       if (res.ok) {
         setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 3000);
+        // 成功保存后，等待 2 秒让用户看到成功状态，然后自动清空
+        setTimeout(() => {
+          setSaveStatus("idle");
+          resetForm(); 
+        }, 2000);
       } else {
         setSaveStatus("error");
       }

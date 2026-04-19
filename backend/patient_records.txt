@@ -12,3 +12,48 @@ IC NUMBER   : 123456789
 TRANSCRIPT  : finally think and speak in English I'm going to explain the
 ============================================================
 
+============================================================
+TIMESTAMP   : 2026-04-17 16:44:45
+FULL NAME   : CYNTHIA
+IC NUMBER   : 1234567890
+TRANSCRIPT  : No transcript recorded
+============================================================
+
+============================================================
+TIMESTAMP   : 2026-04-17 16:46:58
+FULL NAME   : CYNTHIA
+IC NUMBER   : 1234567890
+TRANSCRIPT  : this is a 45 year old female put in from A fall at home approximately 1 hour ago patients sleep in the bathroom and landed on the left out patient is unconscious alert and oriented gcs 15 main complaints is severe left wrist pain if swelling and deformity suspected distilled radius fracture no hate injury reported no loss of consciousness no chance of abdominal pain on ass
+============================================================
+
+============================================================
+TIME: 2026-04-17 16:53:30.425845
+NAME: CYNTHIA
+IC: 0123456789
+TEXT: the importance of prediction in how we use language shall we learn languages how AI works and so quick note following up on my video about my Arabic learning experience some people thought that I had given up on Arabic or was finding it two difficult that's not the case I am continuing with my 11th Arabic studies and before I move on to Hindi I will do a full interview with summer where I will leave with this have a conversation and you'll see that I am making progress despite the difficulties that I find it to my previous video so vocabulary is the best measure of where you are in a language vocabulary is power you don't have the words you can't understand concepts words are absolutely essential to progress in a language and I thought of this in connection with prediction because I was listening to a presentation
+============================================================
+
+============================================================
+TIME: 2026-04-17 18:06:53.405650
+NAME: CYNTHIA TAN XIN RU
+IC: 01234567890
+TEXT: speak in English I'm going to explain the connection give you a simple formula that will help you finally start speaking like a native English speaker are you ready well then I am teacher Tiffany let's jump right in all right so the first thing you have to understand is the 5ws method that's right we must start off by thinking in English using the 5ws who what when where and why so let's say we're talking about our daily life and we're going to start with our morning routine look at this man he's working out hard to describe what he's doing like a native English speaker so we must think in English who is he his name is Mike he's 50 years old
+============================================================
+
+======================================================================
+ [PATIENT ADMISSION RECORD]
+----------------------------------------------------------------------
+ DATE/TIME : 2026-04-17 18:10:19
+ NAME      : CYNTHIA
+ IC NUMBER : 0123456789
+ ASSESSMENT:
+      discipline from working on a farm and the importance of staying
+      in shape from it's military background so again what have we
+      done we have thought in English we saw what was happening this
+      man was building muscles and he doesn't ever remaining this is
+      his morning routine and we use the five W's so now how do we
+      speak in English about his morning routine so once again we have
+      the five W's here organised who what when where and why which
+      will lead us
+======================================================================
+
