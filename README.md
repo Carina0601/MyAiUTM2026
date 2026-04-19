@@ -32,6 +32,7 @@ Before you begin, ensure you have the following installed on your machine:
 ## ⚙️ Installation & Setup
 
 ### 1. Clone the Repository
-bash
+```bash
 git clone https://github.com/Carina0601/MyAiUTM2026
 cd MyAiUTM2026
+```
