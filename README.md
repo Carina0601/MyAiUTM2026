@@ -121,5 +121,5 @@ npm run frontend
 
 ---
 ## References
-Speech to Text using Python : https://www.youtube.com/watch?v=LEDpgye3bf4
-OCR : https://github.com/tesseract-ocr/tesseract
+- Speech to Text using Python : https://www.youtube.com/watch?v=LEDpgye3bf4
+- OCR : https://github.com/tesseract-ocr/tesseract
