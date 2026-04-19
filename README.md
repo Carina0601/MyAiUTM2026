@@ -1,6 +1,9 @@
-# Ahma Agong Monitor Emergency Department
+# Ahma Agong Monitor System
 
-A Smart Triage and Medical Documentation System designed to reduce administrative workload in emergency rooms. This application uses OCR for rapid patient identification (MyKad) and AI-powered voice transcription to automatically generate structured medical reports and notify doctors.
+A Smart Triage and Medical Documentation System designed to reduce administrative workload in emergency rooms. This application uses OCR or manual input for rapid patient identification (MyKad) and AI-powered voice transcription to automatically generate structured medical reports and notify doctors.
+
+## Google Cloud Deployment Link
+https://myaiutm-service-899341642986.asia-southeast1.run.app/
 
 ## 🚀 Tech Stack
 
@@ -116,4 +119,7 @@ npm run frontend
 - Automated PDF Reports: Generates professional PDF records with hospital branding via ReportLab.
 - Instant Notifications: Pushes real-time notifications and PDFs directly to the suggested specialist doctor.
 
-
+---
+## References
+Speech to Text using Python : https://www.youtube.com/watch?v=LEDpgye3bf4
+OCR : https://github.com/tesseract-ocr/tesseract
