@@ -1,5 +1,7 @@
 from firebase_admin import db
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+MYT = timezone(timedelta(hours=8))
 
 def save_notification(doctor_type, name, age, pdf_url):
     patient_name = name.replace("_", " ")
@@ -12,7 +14,7 @@ def save_notification(doctor_type, name, age, pdf_url):
         "age": age,
         "message": f"{doctor_type} required in ER immediately for {patient_name}",
         "pdf_url": pdf_url,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(MYT).isoformat()
     }
 
     reference.push(data)

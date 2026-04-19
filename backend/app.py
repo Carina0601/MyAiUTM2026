@@ -1,101 +1,19 @@
-import sounddevice as sd
-import speech_recognition as sr
-import numpy as np
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import queue
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import textwrap
 from emergency_flow import generate_pdf
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend/dist', static_url_path='/')
 CORS(app)
 
-recognizer = sr.Recognizer()
+
+
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RECORDS_FILE = os.path.join(BASE_DIR, "patient_records.txt")
 
-
-FS = 16000
-audio_queue = queue.Queue()
-
-recording = False
-stream = None
-
-
-def audio_callback(indata, frames, time, status):
-    if status:
-        print("AUDIO STATUS:", status)
-
-    print("AUDIO RECEIVED:", indata.shape)
-    audio_queue.put(indata.copy())
-
-@app.route("/api/start", methods=["POST"])
-def start():
-    global recording, stream
-
-    try:
-        recording = True
-
-        while not audio_queue.empty():
-            audio_queue.get()
-
-        stream = sd.InputStream(
-            samplerate=FS,
-            channels=1,
-            dtype="int16",
-            callback=audio_callback
-        )
-
-        stream.start()
-
-        print("Recording started")
-        return jsonify({"status": "recording"})
-
-    except Exception as e:
-        print("START ERROR:", e)
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/stop", methods=["POST"])
-def stop():
-    global recording, stream
-
-    try:
-        recording = False
-
-        if stream:
-            stream.stop()
-            stream.close()
-            stream = None
-
-        chunks = []
-        while not audio_queue.empty():
-            chunks.append(audio_queue.get())
-
-        print("Chunks received:", len(chunks))
-
-        if len(chunks) == 0:
-            return jsonify({"text": "No audio recorded"})
-
-        audio_data = np.concatenate(chunks, axis=0)
-
-        audio = sr.AudioData(audio_data.tobytes(), FS, 2)
-
-        try:
-            print("Transcribing...")
-            text = recognizer.recognize_google(audio, language="en-MY")
-        except Exception as e:
-            print("Speech Error:", e)
-            text = "Speech recognition failed"
-
-        return jsonify({"text": text})
-
-    except Exception as e:
-        print("STOP ERROR:", e)
-        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/save-record", methods=["POST"])
@@ -107,7 +25,8 @@ def save_record():
         ic = data.get("ic", "UNKNOWN").strip()
         transcript = data.get("transcript", "").strip()
 
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        MYT = timezone(timedelta(hours=8))
+        timestamp = datetime.now(MYT).strftime("%Y-%m-%d %H:%M:%S")
 
         wrapper = textwrap.TextWrapper(
             width=70,
@@ -144,6 +63,14 @@ def save_record():
 @app.route("/api/test", methods=["GET"])
 def test():
     return jsonify({"status": "backend working"})
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_react(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return app.send_static_file(path)
+    else:
+        return app.send_static_file('index.html')
 
 
 if __name__ == "__main__":

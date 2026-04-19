@@ -23,11 +23,46 @@ function App() {
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const timerRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-MY";
+
+      recognition.onresult = (event) => {
+        let currentTranscript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          currentTranscript += event.results[i][0].transcript + " ";
+        }
+        setSpeechText(currentTranscript.trim());
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech error:", event.error);
+        if (event.error !== "no-speech") {
+          setSpeechText((prev) =>
+            prev ? prev + "\n[Error: " + event.error + "]" : "Error: " + event.error
+          );
+        }
+        setRecording(false);
+      };
+
+      recognition.onend = () => {
+        setRecording(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
   }, []);
 
   useEffect(() => {
@@ -115,7 +150,7 @@ function App() {
     if (!image) return;
     setScanStatus("scanning");
     try {
-      const res = await fetch("http://127.0.0.1:5001/api/upload-ic", {
+      const res = await fetch("/api/upload-ic", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image }),
@@ -135,7 +170,7 @@ function App() {
   setSaveStatus("saving");
 
   try {
-    const res = await fetch("http://127.0.0.1:5001/api/save-record", {
+    const res = await fetch("/api/save-record", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -164,26 +199,27 @@ function App() {
   }
 };
 
-  const startRecording = async () => {
+  const startRecording = () => {
+    if (!recognitionRef.current) {
+      setSpeechText("Speech recognition is not supported in this browser.");
+      return;
+    }
     setRecording(true);
     setSpeechText("");
     try {
-      await fetch("http://127.0.0.1:5001/api/start", { method: "POST" });
-    } catch {
-      setSpeechText("Backend connection error.");
-      setRecording(false);
+      recognitionRef.current.start();
+    } catch (e) {
+      console.error("Failed to start recording:", e);
     }
   };
 
-  const stopRecording = async () => {
+  const stopRecording = () => {
+    if (!recognitionRef.current) return;
     setRecording(false);
-    setSpeechText("Processing...");
     try {
-      const res = await fetch("http://127.0.0.1:5001/api/stop", { method: "POST" });
-      const data = await res.json();
-      setSpeechText(data.text);
-    } catch {
-      setSpeechText("Failed to retrieve transcription.");
+      recognitionRef.current.stop();
+    } catch (e) {
+      console.error("Failed to stop recording:", e);
     }
   };
 
@@ -422,7 +458,11 @@ const isFormReady =
             <div className="transcript-box">
               <div className="transcript-label">Transcription Output</div>
               <div className="transcript-text">
-                {speechText || <span className="placeholder">Transcription will appear here...</span>}
+                {recording ? (
+                  <span className="placeholder">Listening... (Text will appear after you stop)</span>
+                ) : (
+                  speechText || <span className="placeholder">Transcription will appear here...</span>
+                )}
               </div>
             </div>
           </div>

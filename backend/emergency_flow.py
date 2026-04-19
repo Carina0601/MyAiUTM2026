@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import os
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
@@ -89,7 +89,8 @@ def generate_pdf():
 
     data = parse_result(result)
 
-    now = datetime.now()
+    MYT = timezone(timedelta(hours=8))
+    now = datetime.now(MYT)
     timestamp = now.strftime("%Y%m%d%H%M%S")
     date_only = now.strftime("%Y-%m-%d")
     time_only = now.strftime("%H:%M:%S")
