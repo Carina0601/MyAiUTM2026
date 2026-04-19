@@ -75,6 +75,7 @@ npm install
 ```
 
 **Frontend Environment Variables:** 
+
 Create a .env.local file inside the frontend folder and add your Firebase client configuration:
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
@@ -89,6 +90,7 @@ VITE_FIREBASE_APP_ID=your_app_id
 
 ## 🏃‍♂️ Running the Application locally
 **Option 1: Running Frontend and Backend together (Recommended)**
+
 From the root of the frontend directory, you can start both the React server and the Flask server simultaneously:
 ```bash
 cd frontend
@@ -96,6 +98,7 @@ npm run dev
 ```
 
 **Option 2: Running them separately**
+
 Start the Backend:
 ```bash
 cd backend
