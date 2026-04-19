@@ -1,34 +1,49 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import './PatientMonitor.css';
-import {db} from './firebase';
-import {DataSnapshot, onValue, ref, update} from 'firebase/database';
+import { db } from './firebase';
+import { onValue, ref, update } from 'firebase/database';
+import check from './assets/check.png';
 
 const AmbulanceMonitor = () => {
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [patients, setPatients] = useState({});
+  const [status, setModal] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
 
-    const [patients, setPatients] = useState({});
+  useEffect(() => {
+    const patientsRef = ref(db, 'patients');
+    const unsubscribe = onValue(patientsRef, (snapshot) => {
+      setPatients(snapshot.val() || {});
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-    useEffect(() => {
-        const patientsRef = ref(db, 'patients');
-        const unsubscribe = onValue(patientsRef, (snapshot) => {
-            setPatients(snapshot.val() || {});
-            setLoading(false);
-        });
-        return () => unsubscribe();
-    }, []);
+  const dispatchedList = Object.entries(patients).filter(([id, p]) => p.dispatchedAt);
 
-    const dispatchedList = Object.entries(patients).filter(([id, p]) => p.dispatchedAt);
+  const completeMission = (id) => {
+    update(ref(db, `patients/${id}`), {
+      status: 'stable',
+      dispatchedAt: null,
+      crewNotes: null,
+      heartRate: 75,
+      spo2: 98,
+      resp: 16
+    }).then(() => {
+      setModal('clear-success');
+      setTimeout(() => {
+        setIsClosing(true);
+        setTimeout(() => {
+          setModal(null);
+          setIsClosing(false);
+        }, 500);
+      }, 2000);
+    });
+  };
 
-    const completeMission = (id) =>{
-        update(ref(db, `patients/${id}`), {
-            dispatchedAt: null,
-            crewNotes: null
-        });
-    };
+  if (loading) return <div className='background'>Connecting to the Server...</div>
 
-    if (loading) return <div className='background'>Connecting to the Server...</div>
-
-    return (
+  return (
     <div className='background'>
       <div className="dashboard-container">
         <div className="page-title">
@@ -46,9 +61,9 @@ const AmbulanceMonitor = () => {
                   <h2 style={{ fontSize: '18px', margin: 0 }}>{p.name}</h2>
                   <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>PRIORITY 1</span>
                 </div>
-                
+
                 <hr className="separator-h" />
-                
+
                 <div className="content-container">
                   <p style={{ fontSize: '12px', color: 'grey' }}>LOCATION</p>
                   <p style={{ fontSize: '15px', fontWeight: '550' }}>{p.addr}</p>
@@ -66,13 +81,15 @@ const AmbulanceMonitor = () => {
                   </div>
                   <div className="flex-column">
                     <p style={{ fontSize: '11px', color: 'grey' }}>DISPATCHED AT</p>
-                    <p style={{ fontWeight: 'bold' }}>{new Date(p.dispatchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p style={{ fontWeight: 'bold' }}>
+                      {p.dispatchedAt ? new Date(p.dispatchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                    </p>
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={() => completeMission(id)}
-                  className="button" 
+                  className="button"
                   style={{ width: '100%', marginTop: '15px', backgroundColor: '#2e7d32' }}
                 >
                   Confirm Arrival / Clear
@@ -86,6 +103,16 @@ const AmbulanceMonitor = () => {
           )}
         </div>
       </div>
+
+      {status === 'clear-success' && (
+        <div className={`overlay-background ${isClosing ? 'hide' : ''}`}>
+          <div className="add-success-popup">
+            <img style={{ height: 'auto', width: '115px' }} src={check} alt="Check"></img>
+            <h3 style={{ fontSize: '18px' }}>Mission Cleared</h3>
+            <p style={{ color: 'grey', fontSize: '14px' }}>Ambulance successfully arrived and patient stabilized.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

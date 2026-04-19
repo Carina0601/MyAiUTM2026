@@ -13,7 +13,6 @@ const db = getDatabase(app);
 
 const startSimulating = async () => {
   console.log("Fetching patients from database...");
-   q
   const snapshot = await get(ref(db, 'patients'));
   
   if (snapshot.exists()) {
