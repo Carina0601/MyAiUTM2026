@@ -2,8 +2,12 @@
 
 A Smart Triage and Medical Documentation System designed to reduce administrative workload in emergency rooms. This application uses OCR or manual input for rapid patient identification (MyKad) and AI-powered voice transcription to automatically generate structured medical reports and notify doctors.
 
+---
+
 ## Google Cloud Deployment Link
 https://myaiutm-service-899341642986.asia-southeast1.run.app/
+
+---
 
 ## 🚀 Tech Stack
 
