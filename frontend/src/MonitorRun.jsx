@@ -63,12 +63,7 @@ const MonitorRun = () => {
     if (snapshot.exists()) {
       const patientIds = Object.keys(snapshot.val());
 
-      const interval = setInterval(async () => {
-        // Fetch fresh state to prevent stale closure bugs
-        const currentSnapshot = await get(ref(db, 'patients'));
-        if (!currentSnapshot.exists()) return;
-        const currentPatients = currentSnapshot.val();
-
+      const interval = setInterval(() => {
         const updates = {};
         patientIds.forEach((id) => {
           const isEmergency = Math.random() < 0.1;
@@ -76,11 +71,10 @@ const MonitorRun = () => {
             ? Math.floor(Math.random() * (140 - 126 + 1)) + 126
             : Math.floor(Math.random() * (95 - 70 + 1)) + 70;
 
-          // Only update if they aren't currently dispatched
-          if (currentPatients[id]?.status !== 'dispatched') {
-             updates[`patients/${id}/heartRate`] = newRate;
-             // Set to critical if emergency, otherwise stable
-             updates[`patients/${id}/status`] = isEmergency ? 'critical' : 'stable'; 
+          updates[`patients/${id}/heartRate`] = newRate;
+
+          if (patients[id]?.status !== 'dispatched') {
+            updates[`patients/${id}/status`] = 'stable';
           }
         });
         update(ref(db), updates);

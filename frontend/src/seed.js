@@ -41,13 +41,13 @@ const patients = {
   p004: {
     name: 'Kak Ros',
     age: 58,
-    heartRate: 125, // Critical case
+    heartRate: 130,
     spo2: 92,
     resp: 26,
     addr: 'No 12, Jalan Dahlia, Kajang',
     emergency: 'Ros Jr (Daughter): 011-5544332',
     conditions: 'Coronary Artery Disease',
-    status: 'stable',
+    status: 'critical',
     ringId: 'SR0004'
   },
   p005: {
@@ -95,7 +95,7 @@ const patients = {
     addr: 'No 3, Lorong Hijau, Puchong',
     emergency: 'Peter (Son): 018-2233445',
     conditions: 'Heart Failure History',
-    status: 'stable',
+    status: 'critical',
     ringId: 'SR0008'
   }
 };

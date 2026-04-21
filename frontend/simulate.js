@@ -14,11 +14,11 @@ const db = getDatabase(app);
 const startSimulating = async () => {
   console.log("Fetching patients from database...");
   const snapshot = await get(ref(db, 'patients'));
-  
+
   if (snapshot.exists()) {
     const patientsData = snapshot.val();
     const patientIds = Object.keys(patientsData);
-    
+
     console.log(`Found ${patientIds.length} patients. Starting heartbeats...`);
 
     setInterval(() => {
@@ -26,10 +26,10 @@ const startSimulating = async () => {
 
       patientIds.forEach((id) => {
         const newRate = Math.floor(Math.random() * (110 - 60 + 1)) + 60;
-        
+
         updates[`patients/${id}/heartRate`] = newRate;
         updates[`patients/${id}/status`] = newRate > 100 ? "critical" : "stable";
-        
+
         console.log(`[SIM] ${id}: ${newRate} BPM`);
       });
 
