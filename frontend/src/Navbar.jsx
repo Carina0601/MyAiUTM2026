@@ -77,6 +77,10 @@ const Navbar = () => {
               Dispatch Queue
             </NavLink>
 
+            <NavLink to="/live-fleet" className="options">
+              Live Fleet
+            </NavLink>
+
             <NavLink to="/speech" className="options">
               Speech Input
             </NavLink>
@@ -99,13 +103,14 @@ const Navbar = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          color: 'grey'
+          color: 'grey',
+          whiteSpace: 'nowrap'
         }}
       >
         <div className="pulse-dot"></div>
-        <span style={{ fontSize: '14px' }}>Live Connection -</span>
-        <p style={{ fontSize: '14px' }}>{timeString}</p>
-        <p style={{ fontSize: '14px' }}>{dateString}</p>
+        <span style={{ fontSize: '12px' }}>Live Connection -</span>
+        <p style={{ fontSize: '12px' }}>{timeString}</p>
+        <p style={{ fontSize: '12px' }}>{dateString}</p>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>

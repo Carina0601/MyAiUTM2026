@@ -113,11 +113,13 @@ h1, p{
 }
 
 .patient-card {
+  background-color: white;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
   border: 1px solid;
+  overflow: hidden;
 }
 
 .flex-centered{
@@ -271,7 +273,7 @@ h1, p{
   border-radius: 14px;
   padding: 1.5rem;
   height: 90%;
-  max-height: 500px;
+  max-height: 570px;
   width: 90%;
   max-width: 420px;
   animation: popIn 0.2s ease-out;
@@ -473,7 +475,7 @@ h1, p{
   border-radius: 14px;
   padding: 1.5rem;
   height: 90%;
-  max-height: 530px;
+  max-height: 610px;
   width: 90%;
   max-width: 420px;
   animation: popIn 0.2s ease-out;
@@ -530,6 +532,7 @@ h1, p{
 }
 
 .add-ring-popup{
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -574,7 +577,24 @@ h1, p{
   transform: scale(1.05);
 }
 
-/* Optional: Different hover color based on mode */
 .mode-toggle-button:active {
   transform: scale(0.95);
+}
+
+.close-cross {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  line-height: 1;
+  padding: 5px;
+  transition: color 0.2s;        
+}
+
+.close-cross:hover{
+  color: #ff4d4d;
 }

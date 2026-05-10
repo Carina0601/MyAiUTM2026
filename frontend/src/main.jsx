@@ -7,6 +7,7 @@ import SpeechPage from './SpeechPage.jsx'
 import SummaryPage from './SummaryPage.jsx'
 import NotificationPage from './NotificationPage.jsx'
 import AmbulanceMonitor from './AmbulanceMonitor.jsx'
+import LiveFleet from './LiveFleet.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/speech" element={<SpeechPage></SpeechPage>}></Route>
         <Route path="/summary" element={<SummaryPage></SummaryPage>}></Route>
         <Route path="/notification" element={<NotificationPage></NotificationPage>}></Route>
+        <Route path="/live-fleet" element={<LiveFleet />}></Route>
 
 
       </Routes>
