@@ -8,36 +8,42 @@ const firebaseConfig = {
   projectId: "test-d93c5",
 };
 
+const CRITICALLY_CRITICAL = "p1778608256107";
+const QUITE_CRITICAL = "p008";
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const startSimulating = async () => {
-  console.log("Fetching patients from database...");
   const snapshot = await get(ref(db, 'patients'));
   
   if (snapshot.exists()) {
-    const patientsData = snapshot.val();
-    const patientIds = Object.keys(patientsData);
+    const patientIds = Object.keys(snapshot.val());
     
-    console.log(`Found ${patientIds.length} patients. Starting heartbeats...`);
-
-    setInterval(() => {
+    setInterval(async () => {
       const updates = {};
 
       patientIds.forEach((id) => {
-        const newRate = Math.floor(Math.random() * (110 - 60 + 1)) + 60;
+        let newRate;
+
+        if (id === CRITICALLY_CRITICAL) {
+          newRate = Math.floor(Math.random() * (170 - 140 + 1)) + 140;
+        } else if (id === QUITE_CRITICAL) {
+          newRate = Math.floor(Math.random() * (125 - 105 + 1)) + 105;
+        } else {
+          newRate = Math.floor(Math.random() * (80 - 65 + 1)) + 65;
+        }
+        
+        const status = (newRate > 100 || newRate < 55) ? "critical" : "stable";
         
         updates[`patients/${id}/heartRate`] = newRate;
-        updates[`patients/${id}/status`] = newRate > 100 ? "critical" : "stable";
+        updates[`patients/${id}/status`] = status;
         
-        console.log(`[SIM] ${id}: ${newRate} BPM`);
+        console.log(`${id}: ${newRate} BPM [${status.toUpperCase()}]`);
       });
 
-      update(ref(db), updates);
+      await update(ref(db), updates);
     }, 3000);
-
-  } else {
-    console.log("❌ No patients found in database. Please add 'p001' manually in Firebase first!");
   }
 };
 

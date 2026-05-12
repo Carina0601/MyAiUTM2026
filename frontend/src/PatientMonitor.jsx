@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './PatientMonitor.css'; 
 import user from './assets/user.png';
 import { db } from './firebase';
-import { ref, update } from 'firebase/database';
+import { ref, update, onValue } from 'firebase/database';
 import ambulance from './assets/ambulance.png';
 
 const stablePath = `M0,36 C15,36 25,36 38,36 C44,36 46,32 49,32 C51,32 52,36 53,36 C55,36 57,34 60,22 C62,14 63,8 65,5 C66,3 67,4 68,9 C70,18 72,42 74,46 C75,48 77,44 79,40 C82,37 86,36 95,36 C108,36 118,39 132,39 C146,39 156,37 168,36 C220,36 270,36 320,36`;
@@ -28,16 +28,84 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
   const prefix = p.gender === 'male' ? 'Mr.' : 'Ms.';
   const firstName = p.name.split(' ')[0];
   const displayName = `${prefix} ${firstName}`;
+  const [hospitals, setHospitals] = useState([]);
+
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // radius of the earth
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  useEffect(() => {
+    const hospRef = ref(db, 'medicalCenters'); 
+    const unsubscribe = onValue(hospRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const hospitalList = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setHospitals(hospitalList);
+      }
+    });
+
+    return () => unsubscribe(); 
+  }, []);
+
+  const determineEmergencyLevel = () => {
+    const needsSurgery = p.heartRate > 140 || p.heartRate < 45 || p.spo2 < 90;
+
+    if (!hospitals || hospitals.length === 0) return null;
+
+    const bestOptions = hospitals
+      .filter(h => !needsSurgery || h.canPerformSurgery)
+      .map(h => ({
+        ...h,
+        distance: getDistance(p.lat, p.lng, h.lat, h.lng)
+      }))
+      .sort((a, b) => a.distance - b.distance);
+
+    if (bestOptions.length > 0) {
+      const chosen = bestOptions[0];
+      return {
+        needsSurgery,
+        hospitalName: chosen.name,
+        hospitalCoords: { lat: chosen.lat, lng: chosen.lng }
+      };
+    }
+
+    return null;
+  };
 
   const handleFinalDispatch = (finalNotes) => {
-    setIsClosing(false);
-    setModal('success');
+    const emergencyInfo = determineEmergencyLevel();
+
+    if (!emergencyInfo) {
+      alert("No suitable hospital found matching surgery requirements.");
+      return;
+    }
+
+    const cleanNotes = (finalNotes && finalNotes.trim() !== "") ? finalNotes : 'none';
+    const now = new Date().toISOString();
 
     update(ref(db, `patients/${id}`), {
       status: 'dispatched',
-      dispatchedAt: new Date().toISOString(),
-      crewNotes: finalNotes || 'none',
+      dispatchedAt: now, 
+      crewNotes: cleanNotes,
+      requiresSurgery: emergencyInfo.needsSurgery,
+      targetHospital: emergencyInfo.hospitalName,
+      targetHospitalLat: emergencyInfo.hospitalCoords.lat,
+      targetHospitalLng: emergencyInfo.hospitalCoords.lng
     });
+
+    setModal('success');
   };
 
   useEffect(() => {
@@ -69,7 +137,7 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
             {p.heartRate} <span style={{ fontSize: '18px' }}>BPM</span>
           </div>
           <p style={{ fontSize: '14px', color: accentColor }}> 
-            {isDispatched ? 'Emergency Notified' : (isCritical ? 'High Tachycardia Warning' : 'Normal Sinus Rhythm')}
+            {isDispatched ? 'Ambulance Dispatched' : (isCritical ? 'High Tachycardia Warning' : 'Normal Sinus Rhythm')}
           </p>
         </div> 
 
@@ -204,34 +272,43 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
         <div className="overlay-background">
           <div className="add-notes-popup">
             <h3 style={{fontSize: '16px'}}>Notes for Crew (Optional)</h3>
-            <hr className= "separator-h" />
+            <hr className="separator-h" />
             <p style={{ fontSize: '14px', color: 'grey' }}>Ambulance dispatched. Add notes for the crew below.</p>
-            <textarea className='cleaner-textarea' value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Patient unresponsive..." rows="4" />
+            
+            <textarea 
+              className='cleaner-textarea' 
+              value={notes} 
+              onChange={e => setNotes(e.target.value)} 
+              placeholder="e.g. Patient unresponsive..." 
+              rows="4" 
+            />
+
             <div style={{gap: '10px'}} className='flex-row'>
               <button className='close-button' onClick={()=> {
+                handleFinalDispatch(''); 
+                
                 setModal('success');
-
                 setTimeout(() => {
                   setIsClosing(true);
                   setTimeout(() => {
-                    handleFinalDispatch('none');
                     setModal(null);
                     setIsClosing(false);
                     setNotes('');
-                  }, 500)
+                  }, 500);
                 }, 2500);
               }}>Skip and Close</button>
+
               <button className='send-button' onClick={() => {
+                handleFinalDispatch(notes);
+
                 setModal('success');
-              
                 setTimeout(() => {
                   setIsClosing(true);
                   setTimeout(() => {
-                    handleFinalDispatch(notes);
                     setModal(null);
                     setIsClosing(false);
                     setNotes('');
-                  }, 500)
+                  }, 500);
                 }, 2500);
               }}>Send</button>
             </div>

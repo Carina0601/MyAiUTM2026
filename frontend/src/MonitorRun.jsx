@@ -6,6 +6,7 @@ import './PatientMonitor.css';
 import { seedDatabase } from './seed';
 import check from './assets/check.png';
 import ring from './assets/smart-ring.png';
+import axios from 'axios';
 
 const MonitorRun = () => {
   const [patients, setPatients] = useState({});
@@ -59,30 +60,42 @@ const MonitorRun = () => {
       return;
     }
 
-    const snapshot = await get(ref(db, 'patients'));
+    const interval = setInterval(async () => {
+      const snapshot = await get(ref(db, 'patients'));
+      if (!snapshot.exists()) return;
 
-    if (snapshot.exists()) {
-      const patientIds = Object.keys(snapshot.val());
-      
-      const interval = setInterval(() => {
-        const updates = {};
-        patientIds.forEach((id) => {
-          const isEmergency = Math.random() < 0.1; 
-          const newRate = isEmergency 
-            ? Math.floor(Math.random() * (140 - 126 + 1)) + 126
-            : Math.floor(Math.random() * (95 - 70 + 1)) + 70;
+      const currentData = snapshot.val();
+      const updates = {};
+      const CRITICAL_ID = "p1778608256107";
+      const INCONSISTENT_ID = "p008";
 
-          updates[`patients/${id}/heartRate`] = newRate;
-          
-          if (patients[id]?.status !== 'dispatched') {
-             updates[`patients/${id}/status`] = 'stable'; 
-          }
-        });
-        update(ref(db), updates);
-      }, 3000);
+      Object.keys(currentData).forEach((id) => {
+        const patient = currentData[id];
+        let newRate;
 
-      setSimInterval(interval);
-    }
+        if (id === CRITICAL_ID) {
+          newRate = Math.floor(Math.random() * (170 - 145 + 1)) + 145;
+        } else if (id === INCONSISTENT_ID) {
+          newRate = Math.random() > 0.5
+            ? Math.floor(Math.random() * (180 - 140 + 1)) + 140
+            : Math.floor(Math.random() * (50 - 30 + 1)) + 30;
+        } else {
+          newRate = Math.floor(Math.random() * (80 - 65 + 1)) + 65;
+        }
+
+        updates[`patients/${id}/heartRate`] = newRate;
+
+        const isDispatched = patient.status === 'dispatched' || patient.dispatchedAt;
+
+        if (!isDispatched) {
+          updates[`patients/${id}/status`] = (newRate > 100 || newRate < 55) ? 'critical' : 'stable';
+        }
+      });
+
+      update(ref(db), updates);
+    }, 3000);
+
+    setSimInterval(interval);
   };
 
   const isFormValid = () => {
@@ -94,6 +107,23 @@ const MonitorRun = () => {
     if(!emergency.trim()) return { validity: false, message: "Emergency contact is required."}
 
     return { validity: true };
+  };
+
+  const getCoords = async (address) => {
+    const API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImY3NDkxM2FjZGQ1ODQ0MGFiNzU4NWQyMjBhNTdkMWE4IiwiaCI6Im11cm11cjY0In0=';
+
+    try{
+      const response = await axios.get(
+        `https://api.openrouteservice.org/geocode/search?api_key=${API_KEY}&text=${encodeURIComponent(address)}&size=1`
+      );
+
+      const [lng, lat] = response.data.features[0].geometry.coordinates;
+      return { lat, lng };
+    }
+    catch (error){
+      console.error("Geocoding failed: ", error);
+      return null;
+    }
   };
 
   if (loading) return <div className="dashboard-container">Connecting...</div>;
@@ -215,7 +245,7 @@ const MonitorRun = () => {
             <div style={{gap: "10px"}} className='spaced-between'>
               <button style={{backgroundColor: 'black', flex: '1', fontSize: "14px"}} className='button' onClick={() => setModal(null)}>Cancel</button>
               <button style={{backgroundColor: '#007bff', flex: '1', fontSize: "14px", opacity: name && age && gender && address && condition && emergency ? 1 : 0.5}} className='button'
-                onClick={() => {
+                onClick={async () => {
                   const validation = isFormValid();
 
                   if(!validation.validity){
@@ -223,10 +253,16 @@ const MonitorRun = () => {
                     return;
                   }
 
-                  const nextNumber = Object.keys(patients).length + 1;
+                  const coordinates = await getCoords(address);
+
+                  if(!coordinates){
+                    alert("We couldn't find that address on the map. Please check the spelling!");
+                    return;
+                  }
+
                   const nextId = `p${Date.now()}`;
                   update(ref(db, `patients/${nextId}`), {
-                    name, age, gender, addr: address, conditions: condition, emergency,
+                    name, age, gender, addr: address, lat: coordinates.lat, lng: coordinates.lng, conditions: condition, emergency,
                     heartRate: 75, spo2: 98, resp: 16, status: 'stable', ringId: 'Pending'
                   })
                   .then(() => {

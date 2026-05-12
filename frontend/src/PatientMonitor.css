@@ -598,3 +598,14 @@ h1, p{
 .close-cross:hover{
   color: #ff4d4d;
 }
+
+.navigate-map-popup{
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  height: 90%;
+  max-height: 570px;
+  width: 90%;
+  max-width: 720px;
+  animation: popIn 0.2s ease-out;
+}

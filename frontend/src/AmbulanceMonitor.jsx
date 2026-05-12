@@ -3,23 +3,65 @@ import './PatientMonitor.css';
 import { db } from './firebase';
 import { onValue, ref, update } from 'firebase/database';
 import check from './assets/check.png';
+import EmergencyMap from './EmergencyMap';
 
 const AmbulanceMonitor = () => {
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState({});
+  const [hospitals, setHospitals] = useState({});
   const [status, setModal] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [currentNotes, setCurrentNotes] = useState("");
+ 
+  const [activeMapData, setActiveMapData] = useState({ patient: null, hospital: null });
+
+  // const [missionData, setMissionData] = useState({
+  //     status: "Waiting for Dispatch..",
+  //     progress: 0,
+  //     eta: 0,
+  //     distance: 0
+  // });
+
+  const [missionDataMap, setMissionDataMap] = useState({});
+  const activeMission = missionDataMap[activeMapData?.id] || { status: '', progress: 0, eta: 0, distance: 0 };
 
   useEffect(() => {
     const patientsRef = ref(db, 'patients');
-    const unsubscribe = onValue(patientsRef, (snapshot) => {
+    const unsubscribePatients = onValue(patientsRef, (snapshot) => {
       setPatients(snapshot.val() || {});
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    const hospitalRef = ref(db, 'medicalCenters');
+    const unsubscribeHospitals = onValue(hospitalRef, (snapshot) => {
+      setHospitals(snapshot.val() || {});
+    })
+
+    return () => {
+      unsubscribePatients();
+      unsubscribeHospitals();
+    };
   }, []);
 
   const dispatchedList = Object.entries(patients).filter(([id, p]) => p.dispatchedAt);
+
+  const fcfsQueue = [...dispatchedList].sort((a, b) => new Date(a[1].dispatchedAt) - new Date(b[1].dispatchedAt));
+
+  const handleStartNavigation = (id, patientData) => {
+    const targetHospital = {
+      name: patientData.targetHospital || "General Hospital",
+      lat: patientData.targetHospitalLat,
+      lng: patientData.targetHospitalLng
+    };
+
+    if (!targetHospital.lat || !targetHospital.lng) {
+      alert("Error: No hospital coordinates saved for this patient.");
+      return;
+    }
+    
+    setActiveMapData({ id, patient: patientData, hospital: targetHospital });
+    setModal('navigate-map');
+  };
 
   const completeMission = (id) => {
     update(ref(db, `patients/${id}`), {
@@ -41,6 +83,15 @@ const AmbulanceMonitor = () => {
     });
   };
 
+  const handleStartDrive = (id) => {
+    update(ref(db, `patients/${id}`), {
+      status: 'dispatched',
+      dispatchedAt: new Date().toISOString(),
+      crewNotes: currentNotes || "none"
+    });
+    setCurrentNotes("");
+  };
+
   if (loading) return <div className='background'>Connecting to the Server...</div>
 
   return (
@@ -59,7 +110,9 @@ const AmbulanceMonitor = () => {
               <div key={id} className="patient-card" style={{ borderColor: '#d32f2f' }}>
                 <div className="spaced-between">
                   <h2 style={{ fontSize: '18px', margin: 0 }}>{p.name}</h2>
-                  <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>PRIORITY 1</span>
+                  <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>
+                    PRIORITY {fcfsQueue.findIndex(([qId]) => qId === id) + 1}
+                  </span>
                 </div>
                 
                 <hr className="separator-h" />
@@ -69,31 +122,37 @@ const AmbulanceMonitor = () => {
                   <p style={{ fontSize: '15px', fontWeight: '550' }}>{p.addr}</p>
                 </div>
 
-                <div className="content-container" style={{ backgroundColor: '#fff5f5', padding: '10px', borderRadius: '8px' }}>
-                  <p style={{ fontSize: '12px', color: '#d32f2f', fontWeight: 'bold' }}>CREW NOTES</p>
-                  <p style={{ fontSize: '14px', fontStyle: 'italic' }}>"{p.crewNotes || 'No notes provided'}"</p>
-                </div>
+                {p.crewNotes && (
+                  <div className="content-container" style={{ marginTop: '10px' }}>
+                    <p style={{ fontSize: '12px', color: 'grey' }}>CREW NOTES</p>
+                    <p style={{ fontSize: '14px', fontStyle: 'italic' }}>{p.crewNotes}</p>
+                  </div>
+                )}
 
                 <div className="spaced-between" style={{ marginTop: '15px' }}>
                   <div className="flex-column">
-                    <p style={{ fontSize: '11px', color: 'grey' }}>HEART RATE</p>
-                    <p style={{ fontWeight: 'bold', color: '#d32f2f' }}>{p.heartRate} BPM</p>
-                  </div>
-                  <div className="flex-column">
-                    <p style={{ fontSize: '11px', color: 'grey' }}>DISPATCHED AT</p>
-                    <p style={{ fontWeight: 'bold' }}>
-                      {p.dispatchedAt ? new Date(p.dispatchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                    </p>
+                    <p style={{ fontSize: '11px', color: 'grey' }}>STATUS</p>
+                    <p style={{ fontWeight: 'bold', color: '#2e7d32' }}>EN ROUTE</p>
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => completeMission(id)}
-                  className="button" 
-                  style={{ width: '100%', marginTop: '15px', backgroundColor: '#2e7d32' }}
-                >
-                  Confirm Arrival / Clear
-                </button>
+                <div style={{ display: 'flex', marginTop: '15px', gap: '20px' }}>
+                  <button 
+                    onClick={() => handleStartNavigation(id, p)} 
+                    className="button"
+                    style={{ flex: '1', backgroundColor: '#007bff', color: 'white', border: 'none' }}
+                  >
+                    Open Live Map
+                  </button>
+
+                  <button 
+                    onClick={() => completeMission(id)} 
+                    className="button" 
+                    style={{ flex: '1', backgroundColor: '#2e7d32', color: 'white', border: 'none' }}
+                  >
+                    Clear Mission
+                  </button>
+                </div>
               </div>
             ))
           ) : (
@@ -110,6 +169,48 @@ const AmbulanceMonitor = () => {
               <img style={{height: 'auto', width: '115px'}} src={check} alt="Check"></img>
                 <h3 style={{ fontSize: '18px' }}>Mission Cleared</h3>
                 <p style={{ color: 'grey', fontSize: '14px' }}>Ambulance successfully arrived and patient stabilized.</p>
+          </div>
+        </div>
+      )}
+
+      {status === 'navigate-map' && (
+        <div className={`overlay-background ${isClosing ? 'hide' : ''}`}>
+          <div className="navigate-map-popup" style={{ position: 'relative'}}>
+              <button className="close-cross" onClick={() => setModal(null)}>&times;</button>
+              <div style={{ 
+                borderRadius: '28px',
+                overflow: 'hidden',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
+                border: '1px solid #f1f5f9',
+                background: '#fff',
+                paddingTop: '20px'
+              }}>
+                <EmergencyMap 
+                  patientHome={{ 
+                    lat: patients[activeMapData.id]?.lat || activeMapData.patient.lat, 
+                    lng: patients[activeMapData.id]?.lng || activeMapData.patient.lng 
+                  }}
+                  hospitalBase={activeMapData.hospital} 
+                  dispatchedAt={patients[activeMapData.id]?.dispatchedAt}
+                  onStatusChange={(data) => setMissionDataMap(prev => ({ ...prev, [activeMapData.id]: data }))}
+                />
+              </div>
+              <div style={{ display: 'flex', paddingTop: '15px', gap: '20px'}}>
+                <div style={{ display: 'flex', paddingTop: '15px', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <p style={{ fontWeight: 550, color: '#007bff' }}>Destination</p>
+                    <p>{activeMission.progress < 50 ? activeMapData.patient?.addr : activeMapData.hospital?.name}</p>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <p style={{ fontWeight: 550, color: '#007bff' }}>Estimated Arrival</p>
+                    <p>{activeMission.eta || '—'}</p>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <p style={{ fontWeight: 550, color: '#007bff' }}>Distance Remaining</p>
+                    <p>{activeMission.distance || '—'} km</p>
+                  </div>
+                </div>
+              </div>       
           </div>
         </div>
       )}
