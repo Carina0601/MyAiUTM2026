@@ -285,30 +285,29 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
 
             <div style={{gap: '10px'}} className='flex-row'>
               <button className='close-button' onClick={()=> {
-                handleFinalDispatch(''); 
-                
                 setModal('success');
+
                 setTimeout(() => {
                   setIsClosing(true);
                   setTimeout(() => {
+                    handleFinalDispatch('');
                     setModal(null);
                     setIsClosing(false);
                     setNotes('');
-                  }, 500);
+                  }, 500)
                 }, 2500);
               }}>Skip and Close</button>
-
               <button className='send-button' onClick={() => {
-                handleFinalDispatch(notes);
-
                 setModal('success');
+              
                 setTimeout(() => {
                   setIsClosing(true);
                   setTimeout(() => {
+                    handleFinalDispatch(notes);
                     setModal(null);
                     setIsClosing(false);
                     setNotes('');
-                  }, 500);
+                  }, 500)
                 }, 2500);
               }}>Send</button>
             </div>
