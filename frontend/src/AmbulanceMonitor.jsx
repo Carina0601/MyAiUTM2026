@@ -68,7 +68,6 @@ const AmbulanceMonitor = () => {
       status: 'stable',
       dispatchedAt: null,
       crewNotes: null,
-      liveStatus: null,
       heartRate: 75,
       spo2: 98,
       resp: 16
@@ -133,13 +132,7 @@ const AmbulanceMonitor = () => {
                 <div className="spaced-between" style={{ marginTop: '15px' }}>
                   <div className="flex-column">
                     <p style={{ fontSize: '11px', color: 'grey' }}>STATUS</p>
-                    <p style={{ 
-                      fontWeight: 'bold', 
-                      color: p.liveStatus?.includes('Arrived') ? '#2e7d32' : '#d32f2f',
-                      textTransform: 'uppercase' 
-                    }}>
-                      {p.liveStatus || 'EN ROUTE'}
-                    </p>
+                    <p style={{ fontWeight: 'bold', color: '#2e7d32' }}>EN ROUTE</p>
                   </div>
                 </div>
 
@@ -199,14 +192,7 @@ const AmbulanceMonitor = () => {
                   }}
                   hospitalBase={activeMapData.hospital} 
                   dispatchedAt={patients[activeMapData.id]?.dispatchedAt}
-                  onStatusChange={(data) => {
-                    setMissionDataMap(prev => ({ ...prev, [activeMapData.id]: data }));
-                    if (data.status) {
-                      update(ref(db, `patients/${activeMapData.id}`), {
-                        liveStatus: data.status
-                      });
-                    }
-                  }}
+                  onStatusChange={(data) => setMissionDataMap(prev => ({ ...prev, [activeMapData.id]: data }))}
                 />
               </div>
               <div style={{ display: 'flex', paddingTop: '15px', gap: '20px'}}>
@@ -228,30 +214,6 @@ const AmbulanceMonitor = () => {
           </div>
         </div>
       )}
-
-      <div style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}>
-        {dispatchedList.map(([id, p]) => (
-          <EmergencyMap 
-            key={`tracker-${id}`}
-            patientHome={{ 
-              lat: p.lat, 
-              lng: p.lng 
-            }}
-            hospitalBase={{ 
-              lat: p.targetHospitalLat, 
-              lng: p.targetHospitalLng 
-            }} 
-            dispatchedAt={p.dispatchedAt}
-            onStatusChange={(data) => {
-              if (data.status && data.status !== p.liveStatus) {
-                update(ref(db, `patients/${id}`), {
-                  liveStatus: data.status
-                });
-              }
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 };
