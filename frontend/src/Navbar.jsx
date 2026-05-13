@@ -77,10 +77,6 @@ const Navbar = () => {
               Dispatch Queue
             </NavLink>
 
-            <NavLink to="/live-fleet" className="options">
-              Live Fleet
-            </NavLink>
-
             <NavLink to="/speech" className="options">
               Speech Input
             </NavLink>

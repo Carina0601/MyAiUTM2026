@@ -4,6 +4,7 @@ import user from './assets/user.png';
 import { db } from './firebase';
 import { ref, update, onValue } from 'firebase/database';
 import ambulance from './assets/ambulance.png';
+import EmergencyMap from './EmergencyMap';
 
 const stablePath = `M0,36 C15,36 25,36 38,36 C44,36 46,32 49,32 C51,32 52,36 53,36 C55,36 57,34 60,22 C62,14 63,8 65,5 C66,3 67,4 68,9 C70,18 72,42 74,46 C75,48 77,44 79,40 C82,37 86,36 95,36 C108,36 118,39 132,39 C146,39 156,37 168,36 C220,36 270,36 320,36`;
 const critPath = `M0,36 C10,36 20,36 30,36 C35,36 37,30 39,30 C41,30 42,36 43,36 C45,36 47,28 49,10 C50,3 51,1 52,1 C53,0 54,3 55,10 C56,20 58,48 60,52 C61,54 63,48 65,40 C67,36 70,36 80,36 C95,36 108,40 124,40 C138,40 150,38 162,36 C220,36 270,36 320,36`;
@@ -25,10 +26,14 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
   const [notes, setNotes] = useState('');
   const [isClosing, setIsClosing] = useState(false);
 
+  const [activeMission, setActiveMission] = useState({ eta: 'Calculating..', distance: '0.0', progress: 0});
+
   const prefix = p.gender === 'male' ? 'Mr.' : 'Ms.';
   const firstName = p.name.split(' ')[0];
   const displayName = `${prefix} ${firstName}`;
   const [hospitals, setHospitals] = useState([]);
+
+  const [missionDataMap, setMissionDataMap] = useState({});
 
   const getDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // radius of the earth
@@ -102,7 +107,8 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
       requiresSurgery: emergencyInfo.needsSurgery,
       targetHospital: emergencyInfo.hospitalName,
       targetHospitalLat: emergencyInfo.hospitalCoords.lat,
-      targetHospitalLng: emergencyInfo.hospitalCoords.lng
+      targetHospitalLng: emergencyInfo.hospitalCoords.lng,
+      liveStatus: 'En Route'
     });
 
     setModal('success');
@@ -171,7 +177,7 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
       <hr className="separator-h" />
 
       <button 
-        onClick={() => setModal(isCritical ? 'dispatch' : 'details')} 
+        onClick={() => setModal(isDispatched ? 'navigate-map' : (isCritical ? 'dispatch' : 'details'))} 
         className='view-info-button' 
         style={{ 
           backgroundColor: (isCritical || isDispatched) ? accentColor : '#fff', 
@@ -179,7 +185,7 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
           border: (isCritical || isDispatched) ? 'none' : '1px solid #ddd'
         }} 
       >
-        {isDispatched ? 'View Details' : (isCritical ? 'Dispatch Ambulance' : 'View Details')}
+        {isDispatched ? 'Track Live Mission' : (isCritical ? 'Dispatch Ambulance' : 'View Details')}
       </button>
 
       {status === 'details' && (
@@ -285,12 +291,12 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
 
             <div style={{gap: '10px'}} className='flex-row'>
               <button className='close-button' onClick={()=> {
-                handleFinalDispatch(''); 
-                
                 setModal('success');
+
                 setTimeout(() => {
                   setIsClosing(true);
                   setTimeout(() => {
+                    handleFinalDispatch('');
                     setModal(null);
                     setIsClosing(false);
                     setNotes('');
@@ -299,12 +305,12 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
               }}>Skip and Close</button>
 
               <button className='send-button' onClick={() => {
-                handleFinalDispatch(notes);
-
                 setModal('success');
+
                 setTimeout(() => {
                   setIsClosing(true);
                   setTimeout(() => {
+                    handleFinalDispatch(notes);
                     setModal(null);
                     setIsClosing(false);
                     setNotes('');
@@ -324,6 +330,133 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
           </div>
         </div>
       )}
+
+      {status === 'navigate-map' && (
+        <div className="overlay-background" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+        }}>
+          <div className="navigate-map-popup" style={{ 
+            position: 'relative', 
+            maxWidth: '850px', 
+            width: '95%', 
+            backgroundColor: '#f1f5f9', 
+            padding: '24px', 
+            borderRadius: '28px', 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            minHeight: '680px'
+          }}>
+
+            <button 
+              className="close-cross" 
+              style={{cursor: 'pointer', fontSize: '24px', position:'absolute', top:'15px', right:'20px', border:'none', background:'none', color: '#64748b'}} 
+              onClick={() => setModal(null)}
+            >
+              &times;
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '12px' }}>
+              <div style={{ 
+                width: '12px', 
+                height: '12px', 
+                backgroundColor: '#ef4444', 
+                borderRadius: '50%', 
+                boxShadow: '0 0 10px #ef4444',
+                animation: 'pulse 1.5s infinite ease-in-out'
+              }}></div>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: '#0f172a' }}>
+                Live Mission Tracker: {p.targetHospital || "Mission Route"}
+              </h2>
+            </div>
+
+            <div style={{ borderRadius: '20px', overflow: 'hidden', height: '350px', background: '#fff', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
+              <EmergencyMap 
+                patientHome={{ lat: p.lat, lng: p.lng }}
+                hospitalBase={{ lat: p.targetHospitalLat, lng: p.targetHospitalLng }} 
+                dispatchedAt={p.dispatchedAt}
+                onStatusChange={(data) => {
+                  setActiveMission({ 
+                    eta: data.eta || 'Calculating..', 
+                    progress: data.progress || 0, 
+                    distance: data.distance || '0.0' 
+                  });
+                  if (data.status === 'Arrived' && p.liveStatus !== 'Arrived') {
+                    update(ref(db, `patients/${id}`), { liveStatus: 'Arrived' });
+                  }
+                }}
+              />
+            </div>
+
+            <div style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '20px', border: '1px solid #cbd5e1', marginBottom: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b' }}>MISSION PROGRESS</span>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#2563eb' }}>{Number(activeMission.progress).toFixed(2)}%</span>
+              </div>
+              <div style={{ width: '100%', height: '10px', backgroundColor: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                <div style={{ 
+                  width: `${activeMission.progress}%`, 
+                  height: '100%', 
+                  backgroundColor: '#2563eb',
+                  transition: 'width 1s ease-in-out'
+                }}></div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '12px' }}>
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '16px', border: '1px solid #cbd5e1' }}>
+                <p style={{fontSize: '10px', fontWeight: '800', color: '#94a3b8', margin: '0 0 4px 0'}}>EST. ARRIVAL</p>
+                <p style={{fontSize: '14px', fontWeight: '700', color: '#2563eb', margin: 0}}>{activeMission.eta || '--:--'}</p>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '16px', border: '1px solid #cbd5e1' }}>
+                <p style={{fontSize: '10px', fontWeight: '800', color: '#94a3b8', margin: '0 0 4px 0'}}>DISTANCE</p>
+                <p style={{fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: 0}}>{activeMission.distance || '0'} km</p>
+              </div>
+
+              <div style={{ background: '#fff', padding: '14px', borderRadius: '16px', border: '1px solid #cbd5e1' }}>
+                <p style={{fontSize: '10px', fontWeight: '800', color: '#94a3b8', margin: '0 0 4px 0'}}>SURGERY REQ.</p>
+                <p style={{fontSize: '14px', fontWeight: '700', color: p.requiresSurgery ? '#ef4444' : '#1e293b', margin: 0}}>
+                  {p.requiresSurgery ? 'YES' : 'NO'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid #cbd5e1' }}>
+              <p style={{fontSize: '10px', fontWeight: '800', color: '#94a3b8', margin: '0 0 6px 0'}}>ROUTE OVERVIEW</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'nowrap' }}>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>{p.addr}</span> 
+                <span style={{ color: '#2563eb', fontWeight: '900', fontSize: '18px' }}>→</span> 
+                <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{p.targetHospital || "Hospital"}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}>
+        {isDispatched && p.targetHospitalLat && p.targetHospitalLng && (
+          <EmergencyMap 
+            patientHome={{lat: p.lat, lng: p.lng}} 
+            hospitalBase={{lat: p.targetHospitalLat, lng: p.targetHospitalLng}}
+            dispatchedAt={p.dispatchedAt}
+            onStatusChange={(data) => {
+               setActiveMission(prev => ({
+                 ...prev,
+                 eta: data.eta || 'Calculating..',
+                 progress: data.progress || 0,
+                 distance: data.distance || '0.0'
+               }));
+
+               setMissionDataMap(prev => ({ ...prev, [id]: data }));
+
+               if (data.status === 'Arrived' && p.liveStatus !== 'Arrived') {
+                 update(ref(db, `patients/${id}`), { liveStatus: 'Arrived' });
+               }
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -193,7 +193,7 @@ const EmergencyMap = ({ patientHome, hospitalBase, notifiedAt, dispatchedAt, onS
 
 
     return (
-        <div style={{ height: '400px', width: '100%', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)', border: '1px solid rgba(255, 255, 255, 0.18)', backgroundColor: '#ffffff'}}>
+        <div style={{ height: '420px', width: '100%', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)', border: '1px solid rgba(255, 255, 255, 0.18)', backgroundColor: '#ffffff'}}>
             <MapContainer center={[patientHome.lat, patientHome.lng]} zoom={16} style={{ height: '100%' }} zoomControl={false}>
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'>
