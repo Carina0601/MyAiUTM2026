@@ -70,7 +70,13 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
     if (!hospitals || hospitals.length === 0) return null;
 
     const bestOptions = hospitals
-      .filter(h => !needsSurgery || h.canPerformSurgery)
+      .filter(h => {
+        if (needsSurgery) {
+          return h.canPerformSurgery === true;
+        }
+
+        return true;
+      })
       .map(h => ({
         ...h,
         distance: getDistance(p.lat, p.lng, h.lat, h.lng)
@@ -85,7 +91,6 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
         hospitalCoords: { lat: chosen.lat, lng: chosen.lng }
       };
     }
-
     return null;
   };
 
@@ -93,14 +98,14 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
     const emergencyInfo = determineEmergencyLevel();
 
     if (!emergencyInfo) {
-      alert("No suitable hospital found matching surgery requirements.");
+      alert("CRITICAL ERROR: No suitable medical facility found for this patient's condition.");
       return;
     }
 
-    const cleanNotes = (finalNotes && finalNotes.trim() !== "") ? finalNotes : 'none';
+    const cleanNotes = finalNotes?.trim() || 'none';
     const now = new Date().toISOString();
 
-    update(ref(db, `patients/${id}`), {
+    const updates = {
       status: 'dispatched',
       dispatchedAt: now, 
       crewNotes: cleanNotes,
@@ -109,9 +114,16 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
       targetHospitalLat: emergencyInfo.hospitalCoords.lat,
       targetHospitalLng: emergencyInfo.hospitalCoords.lng,
       liveStatus: 'En Route'
-    });
+    };
 
-    setModal('success');
+    update(ref(db, `patients/${id}`), updates)
+      .then(() => {
+        setModal('success');
+      })
+      .catch((error) => {
+        console.error("Firebase Update Error:", error);
+        alert("Failed to dispatch ambulance. Please check connection.");
+      });
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { db } from './firebase';
 import { ref, onValue, update, get } from 'firebase/database';
 import PatientMonitor from './PatientMonitor';
@@ -11,7 +11,8 @@ import axios from 'axios';
 const MonitorRun = () => {
   const [patients, setPatients] = useState({});
   const [loading, setLoading] = useState(true);
-  const [simInterval, setSimInterval] = useState(null);
+  const simTimerRef = useRef(null);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const critical = Object.entries(patients).filter(([, p]) => 
     (p.heartRate > 125 || p.heartRate < 55) && p.status !== 'dispatched'
@@ -53,12 +54,24 @@ const MonitorRun = () => {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if(simTimerRef.current){
+        console.log("Cleaning up simulation interval..");
+        clearInterval(simTimerRef.current);
+      }
+    };
+  }, []);
+
   const toggleSimulation = async () => {
-    if (simInterval) {
-      clearInterval(simInterval);
-      setSimInterval(null);
+    if (simTimerRef.current || isSimulating) {
+      clearInterval(simTimerRef.current);
+      simTimerRef.current = null;
+      setIsSimulating(false);
       return;
     }
+
+    setIsSimulating(true);
 
     const RADIUS_DEMO_ID = "p002";
     const GPS_DEMO_ID = "p001";
@@ -125,10 +138,11 @@ const MonitorRun = () => {
         }
       });
 
+      console.log("Simulating...");
       update(ref(db), updates);
     }, 3000);
 
-    setSimInterval(interval);
+    simTimerRef.current = interval;
   };
 
   const isFormValid = () => {
@@ -239,7 +253,7 @@ const MonitorRun = () => {
             onClick={toggleSimulation} 
             style={{ 
               marginTop: '20px', 
-              backgroundColor: simInterval ? '#d32f2f' : '#2e7d32', 
+              backgroundColor: isSimulating ? '#d32f2f' : '#2e7d32', 
               color: 'white', 
               fontWeight: '550', 
               padding: '4px 15px', 
@@ -248,7 +262,7 @@ const MonitorRun = () => {
               cursor: 'pointer'
             }}
           >
-            {simInterval ? "Stop Live Simulation" : "Start Live Simulation"}
+            {isSimulating ? "Stop Live Simulation" : "Start Live Simulation"}
           </button>
         </div>
       </div>
