@@ -344,7 +344,7 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
             padding: '24px', 
             borderRadius: '28px', 
             boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-            minHeight: '680px'
+            minHeight: '700px'
           }}>
 
             <button 
@@ -424,10 +424,24 @@ const PatientMonitor = ({ id, p, onOpenProfile }) => {
             <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid #cbd5e1' }}>
               <p style={{fontSize: '10px', fontWeight: '800', color: '#94a3b8', margin: '0 0 6px 0'}}>ROUTE OVERVIEW</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'nowrap' }}>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>{p.addr}</span> 
-                <span style={{ color: '#2563eb', fontWeight: '900', fontSize: '18px' }}>→</span> 
-                <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{p.targetHospital || "Hospital"}</span>
+                {activeMission.progress < 50 ? (
+                  <>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{p.targetHospital || "Hospital"}</span>
+                    <span style={{ color: '#2563eb', fontWeight: '900', fontSize: '18px' }}>→</span> 
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>{p.addr} (Patient)</span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>{p.addr}</span> 
+                    <span style={{ color: '#2563eb', fontWeight: '900', fontSize: '18px' }}>→</span> 
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{p.targetHospital || "Hospital"}</span>
+                  </>
+                )}
               </div>
+              
+              <p style={{ fontSize: '10px', marginTop: '4px', color: '#2563eb', fontWeight: '600' }}>
+                {activeMission.progress < 50 ? "PHASE: EN ROUTE TO PATIENT" : "PHASE: TRANSPORTING PATIENT TO MEDICAL CENTER"}
+              </p>
             </div>
 
           </div>

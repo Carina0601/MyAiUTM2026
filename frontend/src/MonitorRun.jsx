@@ -60,20 +60,54 @@ const MonitorRun = () => {
       return;
     }
 
-    const interval = setInterval(async () => {
-      const snapshot = await get(ref(db, 'patients'));
-      if (!snapshot.exists()) return;
+    const RADIUS_DEMO_ID = "p002";
+    const GPS_DEMO_ID = "p001";
+    const CRITICAL_ID = "p1778608256107";
+    const INCONSISTENT_ID = "p008";
 
-      const currentData = snapshot.val();
+    const snapshot = await get(ref(db, `patients/${RADIUS_DEMO_ID}`));
+    
+    if (snapshot.exists()) {
+      const p002 = snapshot.val();
+      if (p002.status !== 'dispatched') {
+        update(ref(db, `patients/${RADIUS_DEMO_ID}`), {
+          lat: (p002.lat || 3.1025) + 0.005,
+          lng: (p002.lng || 101.7312) - 0.003,
+          addr: "Assuming Patient is not home"
+        });
+      }
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(() => {}, () => {});
+    }
+
+    const interval = setInterval(async () => {
+      const snap = await get(ref(db, 'patients'));
+      if (!snap.exists()) return;
+
+      const currentData = snap.val();
       const updates = {};
-      const CRITICAL_ID = "p1778608256107";
-      const INCONSISTENT_ID = "p008";
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          if (currentData[GPS_DEMO_ID]?.status !== 'dispatched') {
+            update(ref(db, `patients/${GPS_DEMO_ID}`), {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              addr: "Live GPS Location"
+            });
+          }
+        });
+      }
 
       Object.keys(currentData).forEach((id) => {
         const patient = currentData[id];
         let newRate;
 
-        if (id === CRITICAL_ID) {
+        if (id === GPS_DEMO_ID || id === RADIUS_DEMO_ID) {
+          newRate = Math.floor(Math.random() * (139 - 131 + 1)) + 131;
+        } else if (id === CRITICAL_ID) {
           newRate = Math.floor(Math.random() * (170 - 145 + 1)) + 145;
         } else if (id === INCONSISTENT_ID) {
           newRate = Math.random() > 0.5
@@ -86,9 +120,8 @@ const MonitorRun = () => {
         updates[`patients/${id}/heartRate`] = newRate;
 
         const isDispatched = patient.status === 'dispatched' || patient.dispatchedAt;
-
         if (!isDispatched) {
-          updates[`patients/${id}/status`] = (newRate > 100 || newRate < 55) ? 'critical' : 'stable';
+          updates[`patients/${id}/status`] = (newRate > 125 || newRate < 55) ? 'critical' : 'stable';
         }
       });
 
