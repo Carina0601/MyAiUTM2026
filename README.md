@@ -4,7 +4,7 @@ A Smart Triage and Medical Documentation System designed to reduce administrativ
 
 ---
 
-## Google Cloud Deployment Link
+## Google Cloud Deployment Link (Unusable, Credits expired)
 https://myaiutm-service-899341642986.asia-southeast1.run.app/
 
 ---
